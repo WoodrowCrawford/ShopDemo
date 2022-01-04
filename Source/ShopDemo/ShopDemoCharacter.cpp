@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "ShopDemoCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -16,11 +14,11 @@ AShopDemoCharacter::AShopDemoCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
-	// sets turn rates for input
+	// Sets turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
-	// Don't rotate when the controller rotates. Let that just affect the camera.
+	// Does not rotate when the controller rotates
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
@@ -56,6 +54,8 @@ void AShopDemoCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AShopDemoCharacter::Interact);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AShopDemoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AShopDemoCharacter::MoveRight);
 
@@ -68,6 +68,26 @@ void AShopDemoCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AShopDemoCharacter::LookUpAtRate);
 }
 
+//Used to interact with things around the player
+void AShopDemoCharacter::Interact()
+{
+	FVector Start = FollowCamera->GetComponentLocation();
+	FVector End = FollowCamera->GetForwardVector() * 400.0f;
+
+	FHitResult HitResult;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params))
+	{
+		if (AActor* Actor = HitResult.GetActor())
+		{
+			//Print out the name of the actor hit
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *Actor->GetName());
+		}
+	}
+}
 
 void AShopDemoCharacter::TurnAtRate(float Rate)
 {
@@ -80,6 +100,8 @@ void AShopDemoCharacter::LookUpAtRate(float Rate)
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
+
+
 
 void AShopDemoCharacter::MoveForward(float Value)
 {

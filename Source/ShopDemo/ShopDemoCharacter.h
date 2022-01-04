@@ -17,6 +17,7 @@ class AShopDemoCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 public:
+
 	AShopDemoCharacter();
 
 	//Base turn rate, in deg/sec. Other scaling may affect final turn rate.
@@ -28,6 +29,8 @@ public:
 	float BaseLookUpRate;
 
 protected:
+
+	void Interact();
 
 	//Called for forwards/backward input
 	void MoveForward(float Value);
